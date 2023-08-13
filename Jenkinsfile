@@ -15,39 +15,24 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/muthuannamalai12/terraform-demo-jenkins.git'
-            }
-        }
-        stage('Terraform init') {
-            steps {
-                bat 'terraform init'
-            }
-        }
-        stage('Plan') {
-            steps {
-                bat 'terraform plan -out tfplan'
-                bat 'terraform show -no-color tfplan > tfplan.txt'
-            }
-        }
-        stage('Apply / Destroy') {
-            steps {
-                script {
-                    if (params.action == 'apply') {
-                        if (!params.autoApprove) {
-                            def plan = readFile 'tfplan.txt'
-                            input message: "Do you want to apply the plan?",
-                            parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
-                        }
+            checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/muthuannamalai12/terraform-demo-jenkins.git']]])            
 
-                        bat 'terraform ${action} -input=false tfplan'
-                    } else if (params.action == 'destroy') {
-                        bat 'terraform ${action} --auto-approve'
-                    } else {
-                        error "Invalid action selected. Please choose either 'apply' or 'destroy'."
-                    }
-                }
+          }
+        }
+        
+        stage ("terraform init") {
+            steps {
+                bat ('terraform init') 
             }
         }
-
+        
+        stage ("terraform Action") {
+            steps {
+                echo "Terraform action is --> ${action}"
+                bat ('terraform ${action} --auto-approve') 
+           }
+        }
     }
 }
+
+    
