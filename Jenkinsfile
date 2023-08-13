@@ -20,13 +20,13 @@ pipeline {
         }
         stage('Terraform init') {
             steps {
-                bash 'terraform init'
+                bat 'terraform init'
             }
         }
         stage('Plan') {
             steps {
-                bash 'terraform plan -out tfplan'
-                bash 'terraform show -no-color tfplan > tfplan.txt'
+                bat 'terraform plan -out tfplan'
+                bat 'terraform show -no-color tfplan > tfplan.txt'
             }
         }
         stage('Apply / Destroy') {
@@ -39,9 +39,9 @@ pipeline {
                             parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
                         }
 
-                        bash 'terraform ${action} -input=false tfplan'
+                        bat 'terraform ${action} -input=false tfplan'
                     } else if (params.action == 'destroy') {
-                        bash 'terraform ${action} --auto-approve'
+                        bat 'terraform ${action} --auto-approve'
                     } else {
                         error "Invalid action selected. Please choose either 'apply' or 'destroy'."
                     }
